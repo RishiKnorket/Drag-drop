@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drag and Drop</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-height: 250px;
+      margin: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+      cursor: grab;
+      border-radius: 10px;
+      background: #FFF;
+      box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .sortable-container {
+      display: flex;
+      margin-bottom: 20px;
+      /*  you can change the width of whole container according to your needs  */
+      width: 1200px; 
+    }
+
+    .sortable-container .container {
+      cursor: grab;
+    }
+
+    .empty-container {
+      min-height: 20px;
+      /* Set a minimum height for empty containers */
+    }
+
+    #json-output {
+      white-space: pre-wrap;
+    }
+
+    .drag_and_drop_container {
+      display: flex;
+      justify-content: center;
+
+    }
+
+    .sortable-container.drag-over {
+      background-color: #D9E5FD;
+      /* Change the color for the drag-over state */
+      border-radius: 10px;
+
+    }
+
+    .container p {
+
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="drag_and_drop_container">
+    <div id="sortable-containers" ondrop="drop(event)" ondragover="allowDrop(event)">
+      <div id="bottom-section" class="sortable-container">
+        <div id="container1" class="container" draggable="true" ondragstart="drag(event)">
+          <div class="container_content">
+            <h3>Kpi change Chart 1</h3>
+            <p>Overall Weighted Average KPI Score</p>
+          </div>
+        </div>
+        <div id="container2" class="container" draggable="true" ondragstart="drag(event)">
+          <div class="container_content">
+            <h3>Kpi change Chart 2</h3>
+            <p>Overall Weighted Average KPI Score</p>
+          </div>
+        </div>
+        <div id="container3" class="container" draggable="true" ondragstart="drag(event)">
+          <div class="container_content">
+            <h3>Kpi change Chart 3</h3>
+            <p>Overall Weighted Average KPI Score</p>
+          </div>
+        </div>
+        <div id="container4" class="container" draggable="true" ondragstart="drag(event)">
+          <div class="container_content">
+            <h3>Kpi change Chart 4</h3>
+            <p>Overall Weighted Average KPI Score</p>
+          </div>
+        </div>
+      </div>
+      <div id="bottom-section" class="sortable-container">
+
+        <div id="container5" class="container" draggable="true" ondragstart="drag(event)">
+          <div class="container_content">
+            <h3>Kpi change Chart 5</h3>
+            <p>Overall Weighted Average KPI Score</p>
+          </div>
+        </div>
+        <div id="container6" class="container" draggable="true" ondragstart="drag(event)">
+          <div class="container_content">
+            <h3>Kpi change Chart 6</h3>
+            <p>Overall Weighted Average KPI Score</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="top-section" class="sortable-container empty-container">
+        <!-- Placeholder for new rows -->
+
+      </div>
+
+    </div>
+  </div>
+
+  <div id="json-output">
+    JSON Output: <br>
+  </div>
+
+  <script>
+    function allowDrop(event) {
+      event.preventDefault();
+      var targetContainer = event.target.closest('.sortable-container');
+      if (targetContainer) {
+        targetContainer.classList.add('drag-over');
+      }
+    }
+
+    function drag(event) {
+      event.dataTransfer.setData("text", event.target.id);
+    }
+
+    function dragLeave(event) {
+      var targetContainer = event.target.closest('.sortable-container');
+      if (targetContainer) {
+        targetContainer.classList.remove('drag-over');
+      }
+    }
+
+    function drop(event) {
+  event.preventDefault();
+  var data = event.dataTransfer.getData("text");
+  var draggedElement = document.getElementById(data);
+  var targetContainer = event.target.closest('.sortable-container');
+
+  if (!targetContainer) {
+    return;
+  }
+
+  targetContainer.classList.remove('drag-over'); // Remove drag-over class
+
+  // If dropped onto an empty container, create a new row
+  if (targetContainer.classList.contains('empty-container')) {
+    targetContainer.classList.remove('empty-container');
+
+    var newRow = document.createElement('div');
+    newRow.classList.add('sortable-container');
+    newRow.classList.add('empty-container');
+    targetContainer.parentNode.insertBefore(newRow, targetContainer.nextSibling);
+  }
+
+  // Check if the target container already has 4 cards
+  if (targetContainer.children.length >= 4) {
+    // Check if the dragged element is already in the target container
+    if (!targetContainer.contains(draggedElement)) {
+      alert("Cannot add more than 4 cards to a container.");
+      return;
+    }
+  }
+
+  targetContainer.appendChild(draggedElement);
+  updateJsonOutput();
+}
+
+
+    function updateJsonOutput() {
+      var sortableContainers = document.querySelectorAll('.sortable-container');
+      var jsonOutput = document.getElementById('json-output');
+
+      var result = [];
+
+
+      sortableContainers.forEach(function (container) {
+        var containers = Array.from(container.getElementsByClassName('container')).map(function (c) {
+          return c.id; // Use IDs instead of text content
+        });
+
+        if (containers.length > 0 && containers.length <= 4) {
+          result.push(containers);
+        } else if (containers.length > 4) {
+          alert("Too many cards in a container. Limit is 4.");
+        }
+      });
+
+      jsonOutput.textContent = "JSON Output:\n" + JSON.stringify(result, null, 2);
+    }
+  </script>
+
+</body>
+
+</html>
